@@ -31,5 +31,8 @@ func main() {
 	server.GET("/products", ProductController.GetProducts)
 	server.POST("/product", ProductController.CreateProduct)
 
+	// Rota com parâmetro de rota para obter um produto por ID
+	server.GET("/product/:productId", ProductController.GetProductById)
+
 	server.Run(":8000")
 }
