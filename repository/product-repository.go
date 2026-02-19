@@ -94,3 +94,28 @@ func (pr *ProductRepository) GetProductById(id_product int) (*model.Product, err
 
 	return &produto, nil
 }
+
+func (pr *ProductRepository) UpdateProduct(id_product int, product model.Product) (*model.Product, error) {
+	query, err := pr.connection.Prepare("UPDATE product SET product_name = $1, price = $2 WHERE id = $3 RETURNING id, product_name, price")
+
+	if err != nil {
+		fmt.Println("Error preparing query:", err)
+		return nil, err
+	}
+
+	var updatedProduct model.Product
+	err = query.QueryRow(product.Name, product.Price, id_product).Scan(
+		&updatedProduct.ID,
+		&updatedProduct.Name,
+		&updatedProduct.Price,
+	)
+
+	if err != nil {
+		fmt.Println("Error executing query:", err)
+		return nil, err
+	}
+
+	query.Close()
+
+	return &updatedProduct, nil
+}

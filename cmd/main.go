@@ -34,5 +34,8 @@ func main() {
 	// Rota com parâmetro de rota para obter um produto por ID
 	server.GET("/product/:productId", ProductController.GetProductById)
 
+	// Rota para atualizar um produto por ID
+	server.PUT("/product/:productId", ProductController.UpdateProduct)
+
 	server.Run(":8000")
 }
