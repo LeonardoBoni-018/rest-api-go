@@ -1,10 +1,13 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 
 	"go-api/controller"
 	"go-api/db"
+	"go-api/middleware"
 	"go-api/repository"
 	"go-api/usecase"
 )
@@ -22,25 +25,35 @@ func main() {
 
 	ProductController := controller.NewProductController(*ProductUseCase)
 
+	UserRepo := repository.NewUserRepository(dbConnection)
+	AuthUseCase := usecase.NewAuthUserCase(UserRepo)
+	AuthController := controller.NewAuthController(AuthUseCase)
+
 	server.GET("/ping", func(ctx *gin.Context) {
 		ctx.JSON(200, gin.H{
 			"message": "pong",
 		})
 	})
 
-	// Rota para obter todos os produtos
+	// auth routes
+	server.POST("/login", AuthController.Login)
+	server.POST("/logout", AuthController.Logout)
+
+	// public product routes
 	server.GET("/products", ProductController.GetProducts)
-
 	server.POST("/product", ProductController.CreateProduct)
-
-	// Rota com parâmetro de rota para obter um produto por ID
 	server.GET("/product/:productId", ProductController.GetProductById)
 
-	// Rota para atualizar um produto por ID
-	server.PUT("/product/:productId", ProductController.UpdateProduct)
+	// protected routes example (update/delete require auth)
+	protected := server.Group("/")
+	protected.Use(middleware.AuthMiddlewareFromEnv())
+	protected.PUT("/product/:productId", ProductController.UpdateProduct)
+	protected.DELETE("/product/:productId", ProductController.DeleteProduct)
 
-	// Rota para deletar um produto por ID
-	server.DELETE("/product/:productId", ProductController.DeleteProduct)
+	// debug: listar rotas
+	for _, r := range server.Routes() {
+		fmt.Println(r.Method, r.Path)
+	}
 
 	server.Run(":8000")
 }
