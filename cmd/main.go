@@ -28,7 +28,9 @@ func main() {
 		})
 	})
 
+	// Rota para obter todos os produtos
 	server.GET("/products", ProductController.GetProducts)
+
 	server.POST("/product", ProductController.CreateProduct)
 
 	// Rota com parâmetro de rota para obter um produto por ID
@@ -36,6 +38,9 @@ func main() {
 
 	// Rota para atualizar um produto por ID
 	server.PUT("/product/:productId", ProductController.UpdateProduct)
+
+	// Rota para deletar um produto por ID
+	server.DELETE("/product/:productId", ProductController.DeleteProduct)
 
 	server.Run(":8000")
 }
